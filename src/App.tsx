@@ -1,7 +1,10 @@
 import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useRef} from "react";
-import {watchWebcam} from "./hand-landmarking.ts";
+import {watchWebcam} from "./lib/hand-landmarking.ts";
+import {SignDatabase} from "./lib/sign-database.ts";
+
+const signDb = new SignDatabase();
 
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
@@ -11,7 +14,11 @@ function App() {
         if (canvasRef.current === null || webcamRef.current === null) return;
         if (webcamRef.current.video === null) return;
 
-        watchWebcam(webcamRef.current.video, canvasRef.current)
+        // TODO: internal tool team probably needs to add some sort
+        //  of button that can switch the passed in signDbFn
+        // this returns a reference to the signs
+        const signs = watchWebcam(webcamRef.current.video, canvasRef.current, signDb.recognizeSign)
+        console.log("signs:", signs)
     }, []);
 
     return <>
