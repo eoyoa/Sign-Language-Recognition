@@ -1,4 +1,4 @@
-import type {Sign} from "./hand-landmarking.ts";
+import type {Sign, SignData} from "./hand-landmarking.ts";
 
 /**
  * 2 ppl: recognize sign (implement DTW/find DTW lib online/ask claude)
@@ -14,11 +14,18 @@ import type {Sign} from "./hand-landmarking.ts";
 
 export const unknownSign = "{???}"
 
-export class SignDatabase {
-    // TODO: somebody add underlying data structure
+interface SignMapEntry {
+    embedding: SignData,
+    word: string,
+}
 
-    constructor() {
-        // TODO: when you make the underlying data structure, probably construct it here
+export class SignMap {
+    #embeddingToWordMap: SignMapEntry[] = [];
+
+    constructor(embeddingToWordMap?: SignMapEntry[]) {
+        if (embeddingToWordMap) {
+            this.#embeddingToWordMap = embeddingToWordMap;
+        }
     }
 
     // given sign data, return the ASL gloss for that data
@@ -26,7 +33,7 @@ export class SignDatabase {
         // TODO: run DTW on sign data
         // TODO: assign sign.word
         sign.word = unknownSign;
-        console.log("sign:", sign)
+        console.log("sign:", sign);
     }
 
     // adds sign to database
@@ -35,8 +42,8 @@ export class SignDatabase {
             throw new Error("Cannot add sign to database without word");
         }
 
-        // TODO: add sign with word to associative database
+        this.#embeddingToWordMap.push({embedding: {frames: sign.frames}, word: sign.word})
     }
 }
 
-export type SignDatabaseFunction = SignDatabase["recognizeSign"] | SignDatabase["addSignToDatabase"]
+export type SignDatabaseFunction = SignMap["recognizeSign"] | SignMap["addSignToDatabase"]

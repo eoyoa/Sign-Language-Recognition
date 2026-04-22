@@ -1,5 +1,5 @@
 import {DrawingUtils, FilesetResolver, HandLandmarker, type NormalizedLandmark} from "@mediapipe/tasks-vision";
-import type {SignDatabaseFunction} from "./sign-database.ts";
+import type {SignDatabaseFunction} from "./sign-map.ts";
 
 const vision = await FilesetResolver.forVisionTasks(
     "/wasm"
@@ -22,7 +22,7 @@ function throwNull(msg: string): never {
 
 type Frame = NormalizedLandmark[][]
 
-interface SignData {
+export interface SignData {
     frames: Frame[],
 }
 

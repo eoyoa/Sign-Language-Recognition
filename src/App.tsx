@@ -2,9 +2,9 @@ import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useRef} from "react";
 import {watchWebcam} from "./lib/hand-landmarking.ts";
-import {SignDatabase} from "./lib/sign-database.ts";
+import {SignMap} from "./lib/sign-map.ts";
 
-const signDb = new SignDatabase();
+const signDb = new SignMap();
 
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
