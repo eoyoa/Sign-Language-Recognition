@@ -1,4 +1,17 @@
+/*
+Todo:
+ - Make data persistant
+ - auto flush to data structure
+    - add text field in react
+ - Import from youtube link (optional)
+*/
+
+
+
+
+
 import type {Sign, SignData} from "./hand-landmarking.ts";
+import * as fs from 'fs';
 
 /**
  * 2 ppl: recognize sign (implement DTW/find DTW lib online/ask claude)
@@ -41,8 +54,21 @@ export class SignMap {
         if (sign.word === null) {
             throw new Error("Cannot add sign to database without word");
         }
-
+    
+        // push to instance database
         this.#embeddingToWordMap.push({embedding: {frames: sign.frames}, word: sign.word})
+        // push to persistant database
+        try {
+            // Convert array to a formatted JSON string (4-space indentation)
+            const jsonString = JSON.stringify(this.#embeddingToWordMap, null, 4);
+            
+            // Write to the file
+            fs.writeFileSync('src/MappingDatabase.json', jsonString, 'utf8');
+            console.log('Successfully updated database!');
+        } catch (err) {
+            console.error('Error updating database:', err);
+        }
+
     }
 }
 
