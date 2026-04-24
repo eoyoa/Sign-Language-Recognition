@@ -20,7 +20,7 @@ function throwNull(msg: string): never {
     throw new Error(msg);
 }
 
-type Frame = NormalizedLandmark[][]
+export type Frame = NormalizedLandmark[][]
 
 export interface SignData {
     frames: Frame[],
