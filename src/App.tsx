@@ -1,6 +1,6 @@
 import Webcam from "react-webcam";
 import "./App.css";
-import {useCallback, useRef} from "react";
+import {useCallback, useRef, useState} from "react";
 import {watchWebcam} from "./lib/hand-landmarking.ts";
 import {SignMap} from "./lib/sign-map.ts";
 
@@ -9,6 +9,13 @@ const signDb = new SignMap();
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const [text, setText] = useState("")
+
+    const handleSave = () => {
+        console.log("Saved sign: ", text)
+        // save new sign-word pair
+        setText("")
+    }
 
     const handleCamReady = useCallback(() => {
         if (canvasRef.current === null || webcamRef.current === null) return;
@@ -24,6 +31,15 @@ function App() {
     return <>
         <Webcam id={"webcam"} ref={webcamRef} onCanPlay={handleCamReady}></Webcam>
         <canvas id={"canvas"} ref={canvasRef}></canvas>
+        <input
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Enter Word Here"
+        />
+        <button onClick={handleSave}>
+            Save
+        </button>
     </>;
 }
 
