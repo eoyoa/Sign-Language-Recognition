@@ -9,9 +9,8 @@
  * - maral
  * - linh
  */
-import type {SignData} from "./hand-landmarking.ts";
+import type {HandsData, SignData} from "./hand-landmarking.ts";
 import DynamicTimeWarping from "dynamic-time-warping";
-import type {FeatureVector} from "./feature-vector.ts";
 
 // function euclidianDistance(a: Frame, b: Frame): number {
 //     const hands = Math.min(a.length, b.length);
@@ -33,13 +32,20 @@ import type {FeatureVector} from "./feature-vector.ts";
 //     return total + penalty;
 // }
 
-function featureVectorDistance(a: FeatureVector, b: FeatureVector): number {
+function featureVectorDistance(a: HandsData, b: HandsData): number {
     let diff = 0;
-    const n = Math.min(a.length, b.length);
-    for (let i = 0; i < n; i++) {
-        diff += Math.abs(a[i] - b[i]);
+    const hands = Math.min(a.length, b.length);
+    const penalty = Math.abs(a.length - b.length);
+
+    for (let currHand = 0; currHand < hands; currHand++) {
+        const handA = a[currHand];
+        const handB = b[currHand];
+        const n = Math.min(handA.length, handB.length);
+        for (let i = 0; i < n; i++) {
+            diff += Math.abs(handA[i] - handB[i]);
+        }
     }
-    return diff;
+    return diff * (Math.max(penalty, 1));
 }
 
 export function dtwDistance(a: SignData, b: SignData): number {

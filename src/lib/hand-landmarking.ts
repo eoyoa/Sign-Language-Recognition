@@ -21,9 +21,10 @@ function throwNull(msg: string): never {
 }
 
 export type Frame = NormalizedLandmark[][]
+export type HandsData = FeatureVector[]
 
 export interface SignData {
-    vectors: FeatureVector[]
+    vectors: HandsData[]
 }
 
 interface BaseSign extends SignData {
