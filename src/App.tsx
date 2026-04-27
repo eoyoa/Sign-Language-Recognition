@@ -3,7 +3,8 @@ import "./App.css";
 import {useCallback, useRef, useState} from "react";
 import type {Sign} from "./lib/hand-landmarking.ts";
 import {watchWebcam} from "./lib/hand-landmarking.ts";
-import {isValidMapData, SignMap, type SignMapEntry} from "./lib/sign-map.ts";
+import {SignMap} from "./lib/sign-map.ts";
+import {isValidMapData, type SignMapEntry} from "./lib/util.ts";
 
 const response = await fetch("/MappingDatabase.json");
 const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
