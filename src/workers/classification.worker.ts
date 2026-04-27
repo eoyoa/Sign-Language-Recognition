@@ -1,4 +1,5 @@
-import { dtwDistance, type SignMapEntry } from "../lib/util.ts";
+import { dtwDistance } from "../lib/distance.ts";
+import type { SignMapEntry } from "../lib/util.ts";
 import type { SignData } from "../lib/landmark-detection.ts";
 
 type InMsg =

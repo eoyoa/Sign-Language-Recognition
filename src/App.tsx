@@ -2,7 +2,8 @@ import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useEffect, useRef, useState} from "react";
 import type {Sign} from "./lib/landmark-detection.ts";
-import {watchWebcam} from "./lib/landmark-detection.ts";
+import {createLandmarker} from "./lib/landmark-detection.ts";
+import {createClassificationWorker, createRecognizeHandler, onClassificationResult} from "./lib/classification.ts";
 import {SignMap} from "./lib/sign-map.ts";
 import {isValidMapData, type SignMapEntry} from "./lib/util.ts";
 
@@ -11,10 +12,13 @@ const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
 console.log("mappingDatabase:", mappingDatabase);
 const signDb = isValidMapData(mappingDatabase) ? new SignMap(mappingDatabase) : new SignMap();
 
-const classificationWorker = new Worker(
-    new URL("./workers/classification.worker.ts", import.meta.url),
-    { type: "module" }
-);
+const landmarker = await createLandmarker({
+    wasmPath: "/wasm",
+    handTaskPath: "/tasks/hand_landmarker.task",
+    poseTaskPath: "/tasks/pose_landmarker_lite.task",
+});
+
+const classificationWorker = createClassificationWorker();
 classificationWorker.postMessage({ type: "init", database: signDb.map });
 
 function App() {
@@ -26,13 +30,11 @@ function App() {
     const [recognizedDistance, setRecognizedDistance] = useState<number | null>(null)
 
     useEffect(() => {
-        classificationWorker.onmessage = (e: MessageEvent<{ type: "result"; word: string; distance: number }>) => {
-            if (e.data.type === "result") {
-                console.log("recognized:", e.data.word, "distance:", e.data.distance);
-                setRecognizedWord(e.data.word);
-                setRecognizedDistance(e.data.distance);
-            }
-        };
+        onClassificationResult(classificationWorker, ({ word, distance }) => {
+            console.log("recognized:", word, "distance:", distance);
+            setRecognizedWord(word);
+            setRecognizedDistance(distance);
+        });
     }, []);
 
     const handleSave = useCallback(() => {
@@ -46,7 +48,6 @@ function App() {
 
     const handleExport = useCallback(() => {
         const json = JSON.stringify(signDb.map);
-        // save to public/MappingDatabase.json
         const blob = new Blob([json], {type: "application/json"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -60,14 +61,12 @@ function App() {
         if (canvasRef.current === null || webcamRef.current === null) return;
         if (webcamRef.current.video === null) return;
 
-        // TODO: internal tool team probably needs to add some sort
-        //  of button that can switch the passed in signDbFn
-        // this returns a reference to the signs
-        const signs = watchWebcam(webcamRef.current.video, canvasRef.current, (sign) => {
+        const recognize = createRecognizeHandler(classificationWorker);
+        const signs = landmarker.watchWebcam(webcamRef.current.video, canvasRef.current, (sign) => {
             setPendingSign(sign);
-            classificationWorker.postMessage({ type: "recognize", sign });
-        })
-        console.log("signs:", signs)
+            recognize(sign);
+        });
+        console.log("signs:", signs);
     }, []);
 
     return <>
