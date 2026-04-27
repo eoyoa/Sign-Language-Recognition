@@ -15,7 +15,7 @@ export class SignMap {
         let bestWord = unknownSign;
         let bestDistance = Infinity;
         for (const entry of this.map) {
-            const distance = dtwDistance(sign, entry.featureVector);
+            const distance = dtwDistance(sign, entry.embedding);
             if (distance < bestDistance) {
                 bestDistance = distance;
                 bestWord = entry.word;
@@ -35,6 +35,6 @@ export class SignMap {
             throw new Error("Cannot add sign to database without word");
         }
 
-        this.#vectorToWordMap.push({featureVector: {frames: sign.frames}, word: sign.word});
+        this.#vectorToWordMap.push({embedding: {vectors: sign.vectors}, word: sign.word});
     }
 }

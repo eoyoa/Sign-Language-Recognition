@@ -19,8 +19,8 @@ function App() {
 
     const handleSave = useCallback(() => {
         if (!pendingSign || !word) return;
-        const {frames} = pendingSign;
-        signDb.addSignToMap({frames, word});
+        const {vectors} = pendingSign;
+        signDb.addSignToMap({vectors, word});
         setWord("");
         setPendingSign(null);
     }, [pendingSign, word]);

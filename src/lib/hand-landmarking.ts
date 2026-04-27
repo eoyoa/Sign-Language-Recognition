@@ -1,4 +1,5 @@
 import {DrawingUtils, FilesetResolver, HandLandmarker, type NormalizedLandmark} from "@mediapipe/tasks-vision";
+import {type FeatureVector, getFeatureVector} from "./feature-vector.ts";
 
 const vision = await FilesetResolver.forVisionTasks(
     "/wasm"
@@ -22,7 +23,7 @@ function throwNull(msg: string): never {
 export type Frame = NormalizedLandmark[][]
 
 export interface SignData {
-    frames: Frame[],
+    vectors: FeatureVector[]
 }
 
 interface BaseSign extends SignData {
@@ -34,7 +35,7 @@ export type Sign = BaseSign;
 const signs: Sign[] = [];
 
 function appendSignFrame(sign: Sign, frame: Frame) {
-    sign.frames.push(structuredClone(frame));
+    sign.vectors.push(getFeatureVector(frame));
 }
 
 function flushSign(sign: Sign, signDbFn: (sign: Sign) => void) {
@@ -70,7 +71,7 @@ export function watchWebcam(videoEl: HTMLVideoElement, canvasEl: HTMLCanvasEleme
                 if (currSign === null) {
                     // start new sign
                     console.log("starting new sign")
-                    currSign = {frames: [], word: null};
+                    currSign = {vectors: [], word: null};
                 }
                 appendSignFrame(currSign, detections.landmarks);
                 // draw hand overlay
