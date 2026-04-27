@@ -1,3 +1,4 @@
+
 import type {Frame, Sign, SignData} from "./hand-landmarking.ts";
 import DynamicTimeWarping from "dynamic-time-warping-ts";
 
@@ -74,14 +75,17 @@ export class SignMap {
         console.log("sign:", sign, "distance:", bestDistance);
     }
 
+    getDatabase(): SignMapEntry[] {
+        return this.#embeddingToWordMap;
+    }
+
     // adds sign to database
     addSignToDatabase(sign: Sign) {
         if (sign.word === null) {
             throw new Error("Cannot add sign to database without word");
         }
 
-        this.#embeddingToWordMap.push({embedding: {frames: sign.frames}, word: sign.word})
+        this.#embeddingToWordMap.push({embedding: {frames: sign.frames}, word: sign.word});
+
     }
 }
-
-export type SignDatabaseFunction = SignMap["recognizeSign"] | SignMap["addSignToDatabase"]

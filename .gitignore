@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# landmarking wasm/task
+# landmarking wasm/task (large binary files, not committed)
 public
