@@ -2,9 +2,9 @@ import {
     DrawingUtils,
     FilesetResolver,
     HandLandmarker,
+    PoseLandmarker,
     type NormalizedLandmark,
     type Category,
-    // PoseLandmarker
 } from "@mediapipe/tasks-vision";
 import {type FeatureVector, getFeatureVector} from "./feature-vector.ts";
 
@@ -22,16 +22,16 @@ const handLandmarker = await HandLandmarker.createFromOptions(
         runningMode: "VIDEO",
     });
 
-// const poseLandmarker = await PoseLandmarker.createFromOptions(
-//     vision,
-//     {
-//         baseOptions: {
-//             modelAssetPath: "/tasks/pose_landmarker_lite.task"
-//         },
-//         numPoses: 1,
-//         runningMode: "VIDEO",
-//     }
-// )
+const poseLandmarker = await PoseLandmarker.createFromOptions(
+    vision,
+    {
+        baseOptions: {
+            modelAssetPath: "/tasks/pose_landmarker_lite.task"
+        },
+        numPoses: 1,
+        runningMode: "VIDEO",
+    }
+);
 
 function throwNull(msg: string): never {
     throw new Error(msg);
@@ -40,6 +40,7 @@ function throwNull(msg: string): never {
 export interface Frame {
     handLandmarks: NormalizedLandmark[][];
     handedness: Category[][];
+    poseLandmarks: NormalizedLandmark[];
 }
 
 export type HandSide = "left" | "right";
@@ -84,11 +85,20 @@ export function watchWebcam(videoEl: HTMLVideoElement, canvasEl: HTMLCanvasEleme
 
     function renderLoop() {
         if (videoEl.currentTime !== lastVideoTime) {
-            // ask mediapipe to find landmarks
-            const detections = handLandmarker.detectForVideo(videoEl, performance.now());
+            const nowMs = performance.now();
+            const detections = handLandmarker.detectForVideo(videoEl, nowMs);
+            const poseDetections = poseLandmarker.detectForVideo(videoEl, nowMs);
+            const poseLandmarks = poseDetections.landmarks[0] ?? [];
             lastVideoTime = videoEl.currentTime;
             ctx.save();
             ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            if (poseLandmarks.length > 0) {
+                drawingUtils.drawConnectors(poseLandmarks, PoseLandmarker.POSE_CONNECTIONS, {
+                    color: "#0088FF",
+                    lineWidth: 2,
+                });
+                drawingUtils.drawLandmarks(poseLandmarks, {color: "#0044FF", lineWidth: 1});
+            }
             if (detections.landmarks.length > 0) {
                 // if we have landmarks
                 if (currSign === null) {
@@ -99,6 +109,7 @@ export function watchWebcam(videoEl: HTMLVideoElement, canvasEl: HTMLCanvasEleme
                 appendSignFrame(currSign, {
                     handLandmarks: detections.landmarks,
                     handedness: detections.handedness,
+                    poseLandmarks,
                 });
                 // draw hand overlay
                 for (const landmarks of detections.landmarks) {

@@ -1,8 +1,8 @@
 import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useRef, useState} from "react";
-import type {Sign} from "./lib/hand-landmarking.ts";
-import {watchWebcam} from "./lib/hand-landmarking.ts";
+import type {Sign} from "./lib/landmark-detection.ts";
+import {watchWebcam} from "./lib/landmark-detection.ts";
 import {SignMap} from "./lib/sign-map.ts";
 import {isValidMapData, type SignMapEntry} from "./lib/util.ts";
 

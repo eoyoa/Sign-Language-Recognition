@@ -1,4 +1,4 @@
-import type {HandsData, SignData} from "./hand-landmarking.ts";
+import type {HandsData, SignData} from "./landmark-detection.ts";
 import DynamicTimeWarping from "dynamic-time-warping";
 
 const MISSING_HAND_PENALTY = 1000;
