@@ -45,7 +45,7 @@ function dtwDistance(a: SignData, b: SignData): number {
 
 export const unknownSign = "{???}"
 
-interface SignMapEntry {
+export interface SignMapEntry {
     embedding: SignData,
     word: string,
 }

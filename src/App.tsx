@@ -2,9 +2,12 @@ import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useRef} from "react";
 import {watchWebcam} from "./lib/hand-landmarking.ts";
-import {SignMap} from "./lib/sign-map.ts";
+import {SignMap, type SignMapEntry} from "./lib/sign-map.ts";
 
-const signDb = new SignMap();
+const response = await fetch("/MappingDatabase.json");
+const mappingDatabase: SignMapEntry[] = await response.json();
+console.log("mappingDatabase:", mappingDatabase);
+const signDb = new SignMap(mappingDatabase);
 
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
