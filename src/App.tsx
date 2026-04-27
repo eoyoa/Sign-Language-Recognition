@@ -1,6 +1,6 @@
 import Webcam from "react-webcam";
 import "./App.css";
-import {useCallback, useRef, useState} from "react";
+import {useCallback, useEffect, useRef, useState} from "react";
 import type {Sign} from "./lib/landmark-detection.ts";
 import {watchWebcam} from "./lib/landmark-detection.ts";
 import {SignMap} from "./lib/sign-map.ts";
@@ -11,16 +11,35 @@ const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
 console.log("mappingDatabase:", mappingDatabase);
 const signDb = isValidMapData(mappingDatabase) ? new SignMap(mappingDatabase) : new SignMap();
 
+const classificationWorker = new Worker(
+    new URL("./workers/classification.worker.ts", import.meta.url),
+    { type: "module" }
+);
+classificationWorker.postMessage({ type: "init", database: signDb.map });
+
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [word, setWord] = useState("")
     const [pendingSign, setPendingSign] = useState<Sign | null>(null)
+    const [recognizedWord, setRecognizedWord] = useState<string>("")
+    const [recognizedDistance, setRecognizedDistance] = useState<number | null>(null)
+
+    useEffect(() => {
+        classificationWorker.onmessage = (e: MessageEvent<{ type: "result"; word: string; distance: number }>) => {
+            if (e.data.type === "result") {
+                console.log("recognized:", e.data.word, "distance:", e.data.distance);
+                setRecognizedWord(e.data.word);
+                setRecognizedDistance(e.data.distance);
+            }
+        };
+    }, []);
 
     const handleSave = useCallback(() => {
         if (!pendingSign || !word) return;
         const {vectors} = pendingSign;
         signDb.addSignToMap({vectors, word});
+        classificationWorker.postMessage({ type: "init", database: signDb.map });
         setWord("");
         setPendingSign(null);
     }, [pendingSign, word]);
@@ -46,7 +65,7 @@ function App() {
         // this returns a reference to the signs
         const signs = watchWebcam(webcamRef.current.video, canvasRef.current, (sign) => {
             setPendingSign(sign);
-            signDb.recognizeSign(sign)
+            classificationWorker.postMessage({ type: "recognize", sign });
         })
         console.log("signs:", signs)
     }, []);
@@ -54,6 +73,7 @@ function App() {
     return <>
         <Webcam id={"webcam"} ref={webcamRef} onCanPlay={handleCamReady}></Webcam>
         <canvas id={"canvas"} ref={canvasRef}></canvas>
+        {recognizedWord && <p>Recognized: <strong>{recognizedWord}</strong> (distance: {recognizedDistance?.toFixed(4)})</p>}
         <input
             type="text"
             value={word}
