@@ -1,14 +1,14 @@
 import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useRef, useState} from "react";
-import {watchWebcam} from "./lib/hand-landmarking.ts";
 import type {Sign} from "./lib/hand-landmarking.ts";
-import {SignMap, type SignMapEntry} from "./lib/sign-map.ts";
+import {watchWebcam} from "./lib/hand-landmarking.ts";
+import {isValidMapData, SignMap, type SignMapEntry} from "./lib/sign-map.ts";
 
 const response = await fetch("/MappingDatabase.json");
-const mappingDatabase: SignMapEntry[] = await response.json();
+const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
 console.log("mappingDatabase:", mappingDatabase);
-const signDb = new SignMap(mappingDatabase);
+const signDb = isValidMapData(mappingDatabase) ? new SignMap(mappingDatabase) : new SignMap();
 
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
@@ -18,11 +18,23 @@ function App() {
 
     const handleSave = useCallback(() => {
         if (!pendingSign || !word) return;
-        const { frames } = pendingSign;
-        signDb.addSignToDatabase({ frames, word});
+        const {frames} = pendingSign;
+        signDb.addSignToMap({frames, word});
         setWord("");
         setPendingSign(null);
     }, [pendingSign, word]);
+
+    const handleExport = useCallback(() => {
+        const json = JSON.stringify(signDb.map);
+        // save to public/MappingDatabase.json
+        const blob = new Blob([json], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "MappingDatabase.json";
+        a.click();
+        URL.revokeObjectURL(url);
+    }, [])
 
     const handleCamReady = useCallback(() => {
         if (canvasRef.current === null || webcamRef.current === null) return;
@@ -31,7 +43,10 @@ function App() {
         // TODO: internal tool team probably needs to add some sort
         //  of button that can switch the passed in signDbFn
         // this returns a reference to the signs
-        const signs = watchWebcam(webcamRef.current.video, canvasRef.current, setPendingSign)
+        const signs = watchWebcam(webcamRef.current.video, canvasRef.current, (sign) => {
+            setPendingSign(sign);
+            signDb.recognizeSign(sign)
+        })
         console.log("signs:", signs)
     }, []);
 
@@ -46,6 +61,9 @@ function App() {
         />
         <button onClick={handleSave}>
             Save
+        </button>
+        <button onClick={handleExport}>
+            Export Database
         </button>
     </>;
 }

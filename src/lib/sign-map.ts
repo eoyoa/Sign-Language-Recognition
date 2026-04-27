@@ -1,6 +1,5 @@
-
 import type {Frame, Sign, SignData} from "./hand-landmarking.ts";
-import DynamicTimeWarping from "dynamic-time-warping-ts";
+import DynamicTimeWarping from "dynamic-time-warping";
 
 /**
  * 2 ppl: recognize sign (implement DTW/find DTW lib online/ask claude)
@@ -43,6 +42,9 @@ function dtwDistance(a: SignData, b: SignData): number {
     return dtw.getDistance() / (n + m);
 }
 
+export function isValidMapData(data: unknown): data is SignMapEntry[] {
+    return Array.isArray(data) && data.every(entry => typeof entry === "object" && entry !== null && "embedding" in entry && "word" in entry);
+}
 
 export const unknownSign = "{???}"
 
@@ -55,16 +57,14 @@ export class SignMap {
     #embeddingToWordMap: SignMapEntry[] = [];
 
     constructor(embeddingToWordMap?: SignMapEntry[]) {
-        if (embeddingToWordMap) {
-            this.#embeddingToWordMap = embeddingToWordMap;
-        }
+        this.#embeddingToWordMap = embeddingToWordMap ?? [];
     }
 
     // given sign data, return the ASL gloss for that data
     recognizeSign(sign: Sign) {
         let bestWord = unknownSign;
         let bestDistance = Infinity;
-        for (const entry of this.#embeddingToWordMap) {
+        for (const entry of this.map) {
             const distance = dtwDistance(sign, entry.embedding);
             if (distance < bestDistance) {
                 bestDistance = distance;
@@ -75,17 +75,16 @@ export class SignMap {
         console.log("sign:", sign, "distance:", bestDistance);
     }
 
-    getDatabase(): SignMapEntry[] {
+    get map(): SignMapEntry[] {
         return this.#embeddingToWordMap;
     }
 
     // adds sign to database
-    addSignToDatabase(sign: Sign) {
+    addSignToMap(sign: Sign) {
         if (sign.word === null) {
             throw new Error("Cannot add sign to database without word");
         }
 
         this.#embeddingToWordMap.push({embedding: {frames: sign.frames}, word: sign.word});
-
     }
 }

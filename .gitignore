@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 
 # landmarking wasm/task (large binary files, not committed)
-public
+public/wasm
+public/hand_landmarker.task
