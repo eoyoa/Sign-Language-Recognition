@@ -1,4 +1,11 @@
-import {DrawingUtils, FilesetResolver, HandLandmarker, type NormalizedLandmark} from "@mediapipe/tasks-vision";
+import {
+    DrawingUtils,
+    FilesetResolver,
+    HandLandmarker,
+    type NormalizedLandmark,
+    type Category,
+    // PoseLandmarker
+} from "@mediapipe/tasks-vision";
 import {type FeatureVector, getFeatureVector} from "./feature-vector.ts";
 
 const vision = await FilesetResolver.forVisionTasks(
@@ -9,19 +16,34 @@ const handLandmarker = await HandLandmarker.createFromOptions(
     vision,
     {
         baseOptions: {
-            modelAssetPath: "/hand_landmarker.task"
+            modelAssetPath: "/tasks/hand_landmarker.task"
         },
         numHands: 2,
         runningMode: "VIDEO",
     });
 
+// const poseLandmarker = await PoseLandmarker.createFromOptions(
+//     vision,
+//     {
+//         baseOptions: {
+//             modelAssetPath: "/tasks/pose_landmarker_lite.task"
+//         },
+//         numPoses: 1,
+//         runningMode: "VIDEO",
+//     }
+// )
 
 function throwNull(msg: string): never {
     throw new Error(msg);
 }
 
-export type Frame = NormalizedLandmark[][]
-export type HandsData = FeatureVector[]
+export interface Frame {
+    handLandmarks: NormalizedLandmark[][];
+    handedness: Category[][];
+}
+
+export type HandSide = "left" | "right";
+export type HandsData = { left?: FeatureVector; right?: FeatureVector };
 
 export interface SignData {
     vectors: HandsData[]
@@ -74,7 +96,10 @@ export function watchWebcam(videoEl: HTMLVideoElement, canvasEl: HTMLCanvasEleme
                     console.log("starting new sign")
                     currSign = {vectors: [], word: null};
                 }
-                appendSignFrame(currSign, detections.landmarks);
+                appendSignFrame(currSign, {
+                    handLandmarks: detections.landmarks,
+                    handedness: detections.handedness,
+                });
                 // draw hand overlay
                 for (const landmarks of detections.landmarks) {
                     drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, {
