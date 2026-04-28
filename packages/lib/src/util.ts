@@ -1,4 +1,4 @@
-import type { SignData } from "./landmark-detection.ts";
+import type { SignData } from "./landmark-detection";
 
 export function throwNull(msg: string): never {
     throw new Error(msg);

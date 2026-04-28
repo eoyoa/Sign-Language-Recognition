@@ -1,12 +1,9 @@
-import type { Sign } from "./landmark-detection.ts";
+import type { Sign } from "./landmark-detection";
 
 export type ClassificationResult = { word: string; distance: number };
 
-export function createClassificationWorker(): Worker {
-    return new Worker(
-        new URL("../workers/classification.worker.ts", import.meta.url),
-        { type: "module" }
-    );
+export function createClassificationWorker(workerUrl: string | URL): Worker {
+    return new Worker(workerUrl, { type: "module" });
 }
 
 export function createRecognizeHandler(worker: Worker): (sign: Sign) => void {

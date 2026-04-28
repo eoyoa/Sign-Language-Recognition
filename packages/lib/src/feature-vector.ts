@@ -1,5 +1,5 @@
 import {HandLandmarker, type NormalizedLandmark} from "@mediapipe/tasks-vision";
-import type {Frame, HandsData} from "./landmark-detection.ts";
+import type {Frame, HandsData} from "./landmark-detection";
 import {array, array_equal, dot, linalg, NDArrayCore} from "numpy-ts/core";
 
 function landmarksToConnectionVector(singleHandLandmarks: NormalizedLandmark[]) {

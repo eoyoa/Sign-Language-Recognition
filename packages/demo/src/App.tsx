@@ -1,11 +1,15 @@
 import Webcam from "react-webcam";
 import "./App.css";
 import {useCallback, useEffect, useRef, useState} from "react";
-import type {Sign} from "./lib/landmark-detection.ts";
-import {createLandmarker} from "./lib/landmark-detection.ts";
-import {createClassificationWorker, createRecognizeHandler, onClassificationResult} from "./lib/classification.ts";
-import {SignMap} from "./lib/sign-map.ts";
-import {isValidMapData, type SignMapEntry} from "./lib/util.ts";
+import {
+    createLandmarker,
+    createClassificationWorker,
+    createRecognizeHandler,
+    onClassificationResult,
+    SignMap,
+    isValidMapData,
+} from "sign-language-recognition";
+import type {Sign, SignMapEntry} from "sign-language-recognition";
 
 const response = await fetch("/MappingDatabase.json");
 const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
@@ -18,7 +22,9 @@ const landmarker = await createLandmarker({
     poseTaskPath: "/tasks/pose_landmarker_lite.task",
 });
 
-const classificationWorker = createClassificationWorker();
+const classificationWorker = createClassificationWorker(
+    new URL("sign-language-recognition/worker", import.meta.url)
+);
 classificationWorker.postMessage({ type: "init", database: signDb.map });
 
 function App() {

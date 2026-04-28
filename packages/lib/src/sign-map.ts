@@ -1,6 +1,6 @@
-import type {Sign} from "./landmark-detection.ts";
-import {dtwDistance} from "./distance.ts";
-import type {SignMapEntry} from "./util.ts";
+import type {Sign} from "./landmark-detection";
+import {dtwDistance} from "./distance";
+import type {SignMapEntry} from "./util";
 
 const unknownSign = "{???}"
 

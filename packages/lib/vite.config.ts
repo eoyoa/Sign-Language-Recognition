@@ -5,8 +5,7 @@ export default defineConfig({
     build: {
         lib: {
             entry: {
-                index: resolve(__dirname, "src/lib/index.ts"),
-                worker: resolve(__dirname, "src/workers/classification.worker.ts"),
+                index: resolve(__dirname, "src/index.ts"),
             },
             formats: ["es"],
         },

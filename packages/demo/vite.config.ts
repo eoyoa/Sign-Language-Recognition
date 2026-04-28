@@ -4,7 +4,6 @@ import babel from '@rolldown/plugin-babel'
 import fs from 'fs'
 import path from 'path'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
@@ -17,7 +16,7 @@ export default defineConfig({
           let body = '';
           req.on('data', chunk => { body += chunk; });
           req.on('end', () => {
-            const dbPath = path.resolve(__dirname, 'src/MappingDatabase.json');
+            const dbPath = path.resolve(__dirname, 'public/MappingDatabase.json');
             fs.writeFileSync(dbPath, JSON.stringify(JSON.parse(body), null, 2), 'utf8');
             res.statusCode = 200;
             res.end('ok');

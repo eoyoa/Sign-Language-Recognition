@@ -6,8 +6,8 @@ import {
     type NormalizedLandmark,
     type Category,
 } from "@mediapipe/tasks-vision";
-import {type FeatureVector, getFeatureVector} from "./feature-vector.ts";
-import {throwNull} from "./util.ts";
+import {type FeatureVector, getFeatureVector} from "./feature-vector";
+import {throwNull} from "./util";
 
 export interface LandmarkerConfig {
     wasmPath: string;
