@@ -5066,21 +5066,37 @@ function bs(e, t) {
 	}
 	return n;
 }
-function xs(e, t) {
+function xs(e) {
+	let t = e.slice(), n = t.length;
+	for (let e = 0; e < 3; e++) {
+		let r = n - 6 + e, i = n - 3 + e;
+		[t[r], t[i]] = [t[i], t[r]];
+	}
+	return t;
+}
+function Ss(e) {
+	return { vectors: e.vectors.map((e) => ({
+		left: e.right ? xs(e.right) : void 0,
+		right: e.left ? xs(e.left) : void 0
+	})) };
+}
+function Cs(e, t) {
 	let n = e.vectors.length, r = t.vectors.length;
-	return n === 0 || r === 0 ? Infinity : new i(e.vectors, t.vectors, bs).getDistance() / (n + r);
+	if (n === 0 || r === 0) return Infinity;
+	let a = new i(e.vectors, t.vectors, bs).getDistance(), o = new i(e.vectors, Ss(t).vectors, bs).getDistance();
+	return Math.min(a, o) / (n + r);
 }
 //#endregion
 //#region src/sign-map.ts
-var Ss = "{???}", Cs = class {
+var ws = "{???}", Ts = class {
 	#e = [];
 	constructor(e) {
 		this.#e = e ?? [];
 	}
 	recognizeSign(e) {
-		let t = Ss, n = Infinity;
+		let t = ws, n = Infinity;
 		for (let r of this.map) {
-			let i = xs(e, r.embedding);
+			let i = Cs(e, r.embedding);
 			i < n && (n = i, t = r.word);
 		}
 		e.word = t, console.log("sign:", e, "distance:", n);
@@ -5097,4 +5113,4 @@ var Ss = "{???}", Cs = class {
 	}
 };
 //#endregion
-export { Cs as SignMap, gs as createClassificationWorker, ms as createLandmarker, _s as createRecognizeHandler, xs as dtwDistance, ps as isValidMapData, vs as onClassificationResult, hs as updateDb };
+export { Ts as SignMap, gs as createClassificationWorker, ms as createLandmarker, _s as createRecognizeHandler, Cs as dtwDistance, ps as isValidMapData, vs as onClassificationResult, hs as updateDb };
