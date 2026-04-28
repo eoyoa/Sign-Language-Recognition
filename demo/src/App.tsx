@@ -9,6 +9,7 @@ import {
     onClassificationResult,
     SignMap,
     isValidDatabaseFile,
+    isDatabaseVersionCompatible,
     DB_VERSION,
 } from "sign-language-recognition";
 import type {Sign, MappingDatabaseFile} from "sign-language-recognition";
@@ -16,7 +17,12 @@ import type {Sign, MappingDatabaseFile} from "sign-language-recognition";
 const response = await fetch("/MappingDatabase.json");
 const mappingDatabase: MappingDatabaseFile = JSON.parse(await response.text());
 console.log("mappingDatabase:", mappingDatabase);
-const signDb = isValidDatabaseFile(mappingDatabase) ? new SignMap(mappingDatabase.mappings) : new SignMap();
+if (isValidDatabaseFile(mappingDatabase) && !isDatabaseVersionCompatible(mappingDatabase)) {
+    console.warn(`MappingDatabase.json version "${mappingDatabase.version}" is incompatible with library version "${DB_VERSION}". Starting with an empty database.`);
+}
+const signDb = isValidDatabaseFile(mappingDatabase) && isDatabaseVersionCompatible(mappingDatabase)
+    ? new SignMap(mappingDatabase.mappings)
+    : new SignMap();
 
 const landmarker = await createLandmarker({
     wasmPath: "/wasm",
