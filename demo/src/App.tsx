@@ -4,6 +4,7 @@ import {useCallback, useEffect, useRef, useState} from "react";
 import {
     createLandmarker,
     createClassificationWorker,
+    updateDb,
     createRecognizeHandler,
     onClassificationResult,
     SignMap,
@@ -23,9 +24,9 @@ const landmarker = await createLandmarker({
 });
 
 const classificationWorker = createClassificationWorker(
-    new URL("sign-language-recognition/worker", import.meta.url)
+    new URL("sign-language-recognition/worker", import.meta.url),
+    signDb.map
 );
-classificationWorker.postMessage({ type: "init", database: signDb.map });
 
 function App() {
     const webcamRef = useRef<Webcam | null>(null);
@@ -47,7 +48,7 @@ function App() {
         if (!pendingSign || !word) return;
         const {vectors} = pendingSign;
         signDb.addSignToMap({vectors, word});
-        classificationWorker.postMessage({ type: "init", database: signDb.map });
+        updateDb(classificationWorker, signDb.map);
         setWord("");
         setPendingSign(null);
     }, [pendingSign, word]);

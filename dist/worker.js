@@ -58,10 +58,10 @@ function d(e, t) {
 	return n === 0 || r === 0 ? Infinity : new c.default(e.vectors, t.vectors, u).getDistance() / (n + r);
 }
 //#endregion
-//#region workers/classification.worker.ts
+//#region src/workers/classification.worker.ts
 var f = [];
 self.onmessage = (e) => {
-	if (e.data.type === "init") f = e.data.database;
+	if (e.data.type === "updateDb") f = e.data.database;
 	else if (e.data.type === "recognize") {
 		let { sign: t } = e.data, n = "{???}", r = Infinity;
 		for (let e of f) {

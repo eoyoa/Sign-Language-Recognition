@@ -1,5 +1,5 @@
 export { createLandmarker } from "./landmark-detection";
-export { createClassificationWorker, createRecognizeHandler, onClassificationResult } from "./classification";
+export { createClassificationWorker, updateDb, createRecognizeHandler, onClassificationResult } from "./classification";
 export type { ClassificationResult } from "./classification";
 export { SignMap } from "./sign-map";
 export { dtwDistance } from "./distance";

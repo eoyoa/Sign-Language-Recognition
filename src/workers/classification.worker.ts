@@ -1,9 +1,9 @@
-import { dtwDistance } from "../src/distance";
-import type { SignMapEntry } from "../src/util";
-import type { SignData } from "../src/landmark-detection";
+import { dtwDistance } from "../distance";
+import type { SignMapEntry } from "../util";
+import type { SignData } from "../landmark-detection";
 
 type InMsg =
-    | { type: "init"; database: SignMapEntry[] }
+    | { type: "updateDb"; database: SignMapEntry[] }
     | { type: "recognize"; sign: SignData };
 
 type OutMsg =
@@ -12,7 +12,7 @@ type OutMsg =
 let database: SignMapEntry[] = [];
 
 self.onmessage = (e: MessageEvent<InMsg>) => {
-    if (e.data.type === "init") {
+    if (e.data.type === "updateDb") {
         database = e.data.database;
     } else if (e.data.type === "recognize") {
         const { sign } = e.data;

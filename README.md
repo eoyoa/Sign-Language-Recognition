@@ -38,6 +38,7 @@ The example below mirrors how the demo uses the library. It initializes a landma
 import {
     createLandmarker,
     createClassificationWorker,
+    updateDb,
     createRecognizeHandler,
     onClassificationResult,
     SignMap,
@@ -62,9 +63,9 @@ const landmarker = await createLandmarker({
 
 // Spin up the classification web worker.
 const classificationWorker = createClassificationWorker(
-    new URL("sign-language-recognition/worker", import.meta.url)
+    new URL("sign-language-recognition/worker", import.meta.url),
+    signDb.map
 );
-classificationWorker.postMessage({ type: "init", database: signDb.map });
 
 // Listen for classification results.
 onClassificationResult(classificationWorker, ({ word, distance }) => {
@@ -80,7 +81,7 @@ landmarker.watchWebcam(videoElement, canvasElement, (sign: Sign) => {
 
 // To add a new sign to the database at runtime:
 signDb.addSignToMap({ vectors: sign.vectors, word: "hello" });
-classificationWorker.postMessage({ type: "init", database: signDb.map });
+updateDb(classificationWorker, signDb.map);
 
 // To export the updated database as JSON:
 const json = JSON.stringify(signDb.map);

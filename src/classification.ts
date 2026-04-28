@@ -1,9 +1,16 @@
 import type { Sign } from "./landmark-detection";
+import type { SignMapEntry } from "./util";
 
 export type ClassificationResult = { word: string; distance: number };
 
-export function createClassificationWorker(workerUrl: string | URL): Worker {
-    return new Worker(workerUrl, { type: "module" });
+export function updateDb(worker: Worker, database: SignMapEntry[]): void {
+    worker.postMessage({ type: "updateDb", database });
+}
+
+export function createClassificationWorker(workerUrl: string | URL, database: SignMapEntry[]): Worker {
+    const worker = new Worker(workerUrl, { type: "module" });
+    updateDb(worker, database);
+    return worker;
 }
 
 export function createRecognizeHandler(worker: Worker): (sign: Sign) => void {

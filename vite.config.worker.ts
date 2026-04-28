@@ -6,7 +6,7 @@ export default defineConfig({
         outDir: "dist",
         emptyOutDir: false,
         lib: {
-            entry: resolve(__dirname, "workers/classification.worker.ts"),
+            entry: resolve(__dirname, "src/workers/classification.worker.ts"),
             fileName: "worker",
             formats: ["es"],
         },
