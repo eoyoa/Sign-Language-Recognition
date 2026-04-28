@@ -3,7 +3,8 @@ export { createClassificationWorker, updateDb, createRecognizeHandler, onClassif
 export type { ClassificationResult } from "./classification";
 export { SignMap } from "./sign-map";
 export { dtwDistance } from "./distance";
-export { isValidMapData } from "./util";
+export { isValidMapData, isValidDatabaseFile, isDatabaseVersionCompatible } from "./util";
+export { PACKAGE_VERSION, DB_VERSION } from "./version";
 export type {
     LandmarkerConfig,
     Landmarker,
@@ -13,5 +14,5 @@ export type {
     HandsData,
     HandSide,
 } from "./landmark-detection";
-export type { SignMapEntry } from "./util";
+export type { SignMapEntry, MappingDatabaseFile } from "./util";
 export type { FeatureVector } from "./feature-vector";

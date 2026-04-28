@@ -4958,16 +4958,26 @@ function ds(e) {
 	return t;
 }
 //#endregion
+//#region src/version.ts
+var fs = "1.0.0", [ps, ms] = fs.split("."), hs = `${ps}.${ms}`;
+//#endregion
 //#region src/util.ts
-function fs(e) {
+function gs(e) {
 	throw Error(e);
 }
-function ps(e) {
+function _s(e) {
 	return Array.isArray(e) && e.every((e) => typeof e == "object" && !!e && "embedding" in e && "word" in e);
+}
+function vs(e) {
+	let [t] = e.version.split("."), [n] = hs.split(".");
+	return t === n;
+}
+function ys(e) {
+	return typeof e == "object" && !!e && "version" in e && typeof e.version == "string" && "mappings" in e && _s(e.mappings);
 }
 //#endregion
 //#region src/landmark-detection.ts
-async function ms(i) {
+async function bs(i) {
 	let a = await t.forVisionTasks(i.wasmPath), o = await n.createFromOptions(a, {
 		baseOptions: { modelAssetPath: i.handTaskPath },
 		numHands: 2,
@@ -4979,7 +4989,7 @@ async function ms(i) {
 	});
 	return { watchWebcam(t, i, a) {
 		console.debug("watching webcam"), i.style.width = `${t.videoWidth} px`, i.style.height = `${t.videoHeight} px`, i.width = t.videoWidth, i.height = t.videoHeight;
-		let c = i.getContext("2d") ?? fs("Canvas context is null"), l = -1, u = new e(c), d = [], f = null;
+		let c = i.getContext("2d") ?? gs("Canvas context is null"), l = -1, u = new e(c), d = [], f = null;
 		function p(e, t) {
 			e.vectors.push(ds(t));
 		}
@@ -5023,17 +5033,17 @@ async function ms(i) {
 }
 //#endregion
 //#region src/classification.ts
-function hs(e, t) {
+function xs(e, t) {
 	e.postMessage({
 		type: "updateDb",
 		database: t
 	});
 }
-function gs(e, t) {
+function Ss(e, t) {
 	let n = new Worker(e, { type: "module" });
-	return hs(n, t), n;
+	return xs(n, t), n;
 }
-function _s(e) {
+function Cs(e) {
 	return (t) => {
 		e.postMessage({
 			type: "recognize",
@@ -5041,7 +5051,7 @@ function _s(e) {
 		});
 	};
 }
-function vs(e, t) {
+function ws(e, t) {
 	e.onmessage = (e) => {
 		e.data.type === "result" && t({
 			word: e.data.word,
@@ -5051,14 +5061,14 @@ function vs(e, t) {
 }
 //#endregion
 //#region src/distance.ts
-var ys = 1e3;
-function bs(e, t) {
+var Ts = 1e3;
+function Es(e, t) {
 	let n = 0;
 	for (let r of ["left", "right"]) {
 		let i = e[r], a = t[r];
 		if (!i && !a) continue;
 		if (!i || !a) {
-			n += ys;
+			n += Ts;
 			continue;
 		}
 		let o = Math.min(i.length, a.length);
@@ -5066,7 +5076,7 @@ function bs(e, t) {
 	}
 	return n;
 }
-function xs(e) {
+function Ds(e) {
 	let t = e.slice(), n = t.length;
 	for (let e = 0; e < 3; e++) {
 		let r = n - 6 + e, i = n - 3 + e;
@@ -5074,29 +5084,29 @@ function xs(e) {
 	}
 	return t;
 }
-function Ss(e) {
+function Os(e) {
 	return { vectors: e.vectors.map((e) => ({
-		left: e.right ? xs(e.right) : void 0,
-		right: e.left ? xs(e.left) : void 0
+		left: e.right ? Ds(e.right) : void 0,
+		right: e.left ? Ds(e.left) : void 0
 	})) };
 }
-function Cs(e, t) {
+function ks(e, t) {
 	let n = e.vectors.length, r = t.vectors.length;
 	if (n === 0 || r === 0) return Infinity;
-	let a = new i(e.vectors, t.vectors, bs).getDistance(), o = new i(e.vectors, Ss(t).vectors, bs).getDistance();
+	let a = new i(e.vectors, t.vectors, Es).getDistance(), o = new i(e.vectors, Os(t).vectors, Es).getDistance();
 	return Math.min(a, o) / (n + r);
 }
 //#endregion
 //#region src/sign-map.ts
-var ws = "{???}", Ts = class {
+var As = "{???}", js = class {
 	#e = [];
 	constructor(e) {
 		this.#e = e ?? [];
 	}
 	recognizeSign(e) {
-		let t = ws, n = Infinity;
+		let t = As, n = Infinity;
 		for (let r of this.map) {
-			let i = Cs(e, r.embedding);
+			let i = ks(e, r.embedding);
 			i < n && (n = i, t = r.word);
 		}
 		e.word = t, console.log("sign:", e, "distance:", n);
@@ -5113,4 +5123,4 @@ var ws = "{???}", Ts = class {
 	}
 };
 //#endregion
-export { Ts as SignMap, gs as createClassificationWorker, ms as createLandmarker, _s as createRecognizeHandler, Cs as dtwDistance, ps as isValidMapData, vs as onClassificationResult, hs as updateDb };
+export { hs as DB_VERSION, fs as PACKAGE_VERSION, js as SignMap, Ss as createClassificationWorker, bs as createLandmarker, Cs as createRecognizeHandler, ks as dtwDistance, vs as isDatabaseVersionCompatible, ys as isValidDatabaseFile, _s as isValidMapData, ws as onClassificationResult, xs as updateDb };

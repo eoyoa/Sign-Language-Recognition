@@ -42,15 +42,15 @@ import {
     createRecognizeHandler,
     onClassificationResult,
     SignMap,
-    isValidMapData,
+    isValidDatabaseFile,
 } from "sign-language-recognition";
-import type { Sign, SignMapEntry } from "sign-language-recognition";
+import type { Sign, MappingDatabaseFile } from "sign-language-recognition";
 
-// Load your sign database (array of SignMapEntry objects).
+// Load your sign database from a versioned MappingDatabase.json file.
 // Pass an empty SignMap() if you have no pre-existing database.
 const response = await fetch("/MappingDatabase.json");
-const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
-const signDb = isValidMapData(mappingDatabase) ? new SignMap(mappingDatabase) : new SignMap();
+const mappingDatabase: MappingDatabaseFile = JSON.parse(await response.text());
+const signDb = isValidDatabaseFile(mappingDatabase) ? new SignMap(mappingDatabase.mappings) : new SignMap();
 
 // Initialize the landmarker with served paths to the WASM runtime and model task files.
 // Note that these paths are transformed by Vite.
@@ -84,9 +84,46 @@ signDb.addSignToMap({ vectors: sign.vectors, word: "hello" });
 updateDb(classificationWorker, signDb.map);
 
 // To export the updated database as JSON:
-const json = JSON.stringify(signDb.map);
+const file: MappingDatabaseFile = { version: "1.0", mappings: signDb.map };
+const json = JSON.stringify(file, null, 2);
 ```
 
+
+## MappingDatabase.json format
+
+The sign database file uses a versioned JSON format:
+
+```json
+{
+  "version": "1.0",
+  "mappings": [
+    { "embedding": { "vectors": [...] }, "word": "hello" }
+  ]
+}
+```
+
+- `version` — `"major.minor"` string, tracking the major and minor version of the library that wrote the file. Patch versions never affect the schema and are omitted.
+  - Bump **major** on breaking changes (fields removed, structure restructured). Readers should reject files with an unrecognised major version.
+  - Bump **minor** on backwards-compatible additions (new optional fields). Old readers can still load the file safely.
+- `mappings` — array of `SignMapEntry` objects, each with an `embedding` (`SignData`) and a `word` label.
+
+An empty database on disk looks like:
+
+```json
+{ "version": "1.0", "mappings": [] }
+```
+
+Use `isValidDatabaseFile` to validate a parsed JSON value before constructing a `SignMap`:
+
+```ts
+import { isValidDatabaseFile, SignMap } from "sign-language-recognition";
+import type { MappingDatabaseFile } from "sign-language-recognition";
+
+const data: MappingDatabaseFile = JSON.parse(rawJson);
+const signDb = isValidDatabaseFile(data) ? new SignMap(data.mappings) : new SignMap();
+```
+
+---
 
 ## How to push changes
 

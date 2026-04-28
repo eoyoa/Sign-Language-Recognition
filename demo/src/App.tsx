@@ -8,14 +8,15 @@ import {
     createRecognizeHandler,
     onClassificationResult,
     SignMap,
-    isValidMapData,
+    isValidDatabaseFile,
+    DB_VERSION,
 } from "sign-language-recognition";
-import type {Sign, SignMapEntry} from "sign-language-recognition";
+import type {Sign, MappingDatabaseFile} from "sign-language-recognition";
 
 const response = await fetch("/MappingDatabase.json");
-const mappingDatabase: SignMapEntry[] = JSON.parse(await response.text());
+const mappingDatabase: MappingDatabaseFile = JSON.parse(await response.text());
 console.log("mappingDatabase:", mappingDatabase);
-const signDb = isValidMapData(mappingDatabase) ? new SignMap(mappingDatabase) : new SignMap();
+const signDb = isValidDatabaseFile(mappingDatabase) ? new SignMap(mappingDatabase.mappings) : new SignMap();
 
 const landmarker = await createLandmarker({
     wasmPath: "/wasm",
@@ -54,7 +55,8 @@ function App() {
     }, [pendingSign, word]);
 
     const handleExport = useCallback(() => {
-        const json = JSON.stringify(signDb.map);
+        const file: MappingDatabaseFile = { version: DB_VERSION, mappings: signDb.map };
+        const json = JSON.stringify(file, null, 2);
         const blob = new Blob([json], {type: "application/json"});
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");

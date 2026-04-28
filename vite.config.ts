@@ -1,7 +1,13 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
+import { readFileSync } from "fs";
+
+const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf-8")) as { version: string };
 
 export default defineConfig({
+    define: {
+        __PACKAGE_VERSION__: JSON.stringify(version),
+    },
     build: {
         lib: {
             entry: {
