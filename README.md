@@ -43,6 +43,7 @@ import {
     onClassificationResult,
     SignMap,
     isValidDatabaseFile,
+    isDatabaseVersionCompatible,
 } from "sign-language-recognition";
 import type { Sign, MappingDatabaseFile } from "sign-language-recognition";
 
@@ -50,7 +51,10 @@ import type { Sign, MappingDatabaseFile } from "sign-language-recognition";
 // Pass an empty SignMap() if you have no pre-existing database.
 const response = await fetch("/MappingDatabase.json");
 const mappingDatabase: MappingDatabaseFile = JSON.parse(await response.text());
-const signDb = isValidDatabaseFile(mappingDatabase) ? new SignMap(mappingDatabase.mappings) : new SignMap();
+const signDb =
+    isValidDatabaseFile(mappingDatabase) && isDatabaseVersionCompatible(mappingDatabase)
+        ? new SignMap(mappingDatabase.mappings)
+        : new SignMap();
 
 // Initialize the landmarker with served paths to the WASM runtime and model task files.
 // Note that these paths are transformed by Vite.
@@ -113,15 +117,24 @@ An empty database on disk looks like:
 { "version": "1.0", "mappings": [] }
 ```
 
-Use `isValidDatabaseFile` to validate a parsed JSON value before constructing a `SignMap`:
+Use `isValidDatabaseFile` to validate the structure of a parsed JSON value, and `isDatabaseVersionCompatible` to confirm the file's major version matches the installed library before constructing a `SignMap`:
 
 ```ts
-import { isValidDatabaseFile, SignMap } from "sign-language-recognition";
+import { isValidDatabaseFile, isDatabaseVersionCompatible, SignMap } from "sign-language-recognition";
 import type { MappingDatabaseFile } from "sign-language-recognition";
 
-const data: MappingDatabaseFile = JSON.parse(rawJson);
-const signDb = isValidDatabaseFile(data) ? new SignMap(data.mappings) : new SignMap();
+const data: unknown = JSON.parse(rawJson);
+
+if (!isValidDatabaseFile(data)) {
+    console.error("File is not a valid MappingDatabaseFile.");
+} else if (!isDatabaseVersionCompatible(data)) {
+    console.error(`Database version ${data.version} is incompatible with this version of the library.`);
+} else {
+    const signDb = new SignMap(data.mappings);
+}
 ```
+
+`isDatabaseVersionCompatible` compares only the **major** version component. A file written by a library with a different major version may have breaking structural changes and should be rejected. Minor-version differences are backwards-compatible and are accepted.
 
 ---
 
