@@ -1,5 +1,7 @@
 # Sign Language Recognition
 
+Sign language recognition on the web in TypeScript.
+
 ## Running the demo
 
 `cd` to `demo/`.
@@ -144,3 +146,9 @@ if (!isValidDatabaseFile(data)) {
 - Make your changes
 - Push them to your fork
 - Create a pull request
+
+---
+
+## References
+
+Inspired by [gabguerin/Sign-Language-Recognition--MediaPipe-DTW](https://github.com/gabguerin/Sign-Language-Recognition--MediaPipe-DTW), a Python implementation using MediaPipe and Dynamic Time Warping.
