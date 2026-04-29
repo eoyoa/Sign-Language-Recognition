@@ -1,6 +1,6 @@
-import type { HandsData, SignData } from "./landmark-detection";
-import type { FeatureVector } from "./feature-vector";
-import { SHOULDER_DATA_LENGTH } from "./feature-vector";
+import type {HandsData, SignData} from "./landmark-detection";
+import type {FeatureVector} from "./feature-vector";
+import {SHOULDER_DATA_LENGTH} from "./feature-vector";
 import DynamicTimeWarping from "dynamic-time-warping";
 
 const MISSING_HAND_PENALTY = 1000;
@@ -10,9 +10,15 @@ function featureVectorDistance(a: HandsData, b: HandsData): number {
     for (const side of ["left", "right"] as const) {
         const handA = a[side], handB = b[side];
         if (!handA && !handB) continue;
-        if (!handA || !handB) { diff += MISSING_HAND_PENALTY; continue; }
+        if (!handA || !handB) {
+            diff += MISSING_HAND_PENALTY;
+            continue;
+        }
         const n = Math.min(handA.length, handB.length);
-        for (let i = 0; i < n; i++) diff += Math.abs(handA[i] - handB[i]);
+        for (let i = 0; i < n; i++) {
+            const distance = Math.abs(handA[i] - handB[i]);
+            diff += Math.exp(distance) - 1;
+        }
     }
     return diff;
 }
@@ -41,8 +47,8 @@ function swapShoulderBlocks(fv: FeatureVector): FeatureVector {
 function swapHandedness(sign: SignData): SignData {
     return {
         vectors: sign.vectors.map(f => ({
-            left:  f.right ? swapShoulderBlocks(f.right) : undefined,
-            right: f.left  ? swapShoulderBlocks(f.left)  : undefined,
+            left: f.right ? swapShoulderBlocks(f.right) : undefined,
+            right: f.left ? swapShoulderBlocks(f.left) : undefined,
         })),
     };
 }

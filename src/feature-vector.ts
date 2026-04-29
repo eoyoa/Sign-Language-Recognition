@@ -46,24 +46,20 @@ export const SHOULDER_DATA_LENGTH = 6;
 function handCentroid(handLandmarks: NormalizedLandmark[]): { x: number; y: number; z: number } {
     const n = handLandmarks.length;
     const sum = handLandmarks.reduce(
-        (acc, lm) => ({ x: acc.x + lm.x, y: acc.y + lm.y, z: acc.z + lm.z }),
-        { x: 0, y: 0, z: 0 }
+        (acc, lm) => ({x: acc.x + lm.x, y: acc.y + lm.y, z: acc.z + lm.z}),
+        {x: 0, y: 0, z: 0}
     );
-    return { x: sum.x / n, y: sum.y / n, z: sum.z / n };
+    return {x: sum.x / n, y: sum.y / n, z: sum.z / n};
 }
-
-// Returns the vector from shoulder to hand centroid [dx, dy, dz].
-// Signs are preserved: negative dy means hand is above the shoulder.
-const signedSquare = (v: number) => v * Math.abs(v);
 
 function shoulderToHandVector(
     centroid: { x: number; y: number; z: number },
     shoulder: NormalizedLandmark
 ): [number, number, number] {
     return [
-        signedSquare(centroid.x - shoulder.x),
-        signedSquare(centroid.y - shoulder.y),
-        signedSquare(centroid.z - shoulder.z),
+        centroid.x - shoulder.x,
+        centroid.y - shoulder.y,
+        centroid.z - shoulder.z,
     ];
 }
 

@@ -4932,15 +4932,14 @@ function cs(e) {
 		z: n.z / t
 	};
 }
-var ls = (e) => e * Math.abs(e);
-function us(e, t) {
+function ls(e, t) {
 	return [
-		ls(e.x - t.x),
-		ls(e.y - t.y),
-		ls(e.z - t.z)
+		e.x - t.x,
+		e.y - t.y,
+		e.z - t.z
 	];
 }
-function ds(e) {
+function us(e) {
 	let t = {};
 	for (let n = 0; n < e.handLandmarks.length; n++) {
 		let r = e.handLandmarks[n], i = e.handedness[n][0].categoryName.toLowerCase(), a = os(r), o = [];
@@ -4951,7 +4950,7 @@ function ds(e) {
 		let s = e.poseLandmarks[11], c = e.poseLandmarks[12];
 		if (s && c) {
 			let e = cs(r);
-			o.push(...us(e, s)), o.push(...us(e, c));
+			o.push(...ls(e, s)), o.push(...ls(e, c));
 		} else o.push(0, 0, 0, 0, 0, 0);
 		t[i] = o;
 	}
@@ -4959,25 +4958,25 @@ function ds(e) {
 }
 //#endregion
 //#region src/version.ts
-var fs = "1.0.0", [ps, ms] = fs.split("."), hs = `${ps}.${ms}`;
+var ds = "1.0.0", [fs, ps] = ds.split("."), ms = `${fs}.${ps}`;
 //#endregion
 //#region src/util.ts
-function gs(e) {
+function hs(e) {
 	throw Error(e);
 }
-function _s(e) {
+function gs(e) {
 	return Array.isArray(e) && e.every((e) => typeof e == "object" && !!e && "embedding" in e && "word" in e);
 }
-function vs(e) {
-	let [t] = e.version.split("."), [n] = hs.split(".");
+function _s(e) {
+	let [t] = e.version.split("."), [n] = ms.split(".");
 	return t === n;
 }
-function ys(e) {
-	return typeof e == "object" && !!e && "version" in e && typeof e.version == "string" && "mappings" in e && _s(e.mappings);
+function vs(e) {
+	return typeof e == "object" && !!e && "version" in e && typeof e.version == "string" && "mappings" in e && gs(e.mappings);
 }
 //#endregion
 //#region src/landmark-detection.ts
-async function bs(i) {
+async function ys(i) {
 	let a = await t.forVisionTasks(i.wasmPath), o = await n.createFromOptions(a, {
 		baseOptions: { modelAssetPath: i.handTaskPath },
 		numHands: 2,
@@ -4989,9 +4988,9 @@ async function bs(i) {
 	});
 	return { watchWebcam(t, i, a) {
 		console.debug("watching webcam"), i.style.width = `${t.videoWidth} px`, i.style.height = `${t.videoHeight} px`, i.width = t.videoWidth, i.height = t.videoHeight;
-		let c = i.getContext("2d") ?? gs("Canvas context is null"), l = -1, u = new e(c), d = [], f = null;
+		let c = i.getContext("2d") ?? hs("Canvas context is null"), l = -1, u = new e(c), d = [], f = null;
 		function p(e, t) {
-			e.vectors.push(ds(t));
+			e.vectors.push(us(t));
 		}
 		function m(e) {
 			a(e), d.push(e);
@@ -5033,17 +5032,17 @@ async function bs(i) {
 }
 //#endregion
 //#region src/classification.ts
-function xs(e, t) {
+function bs(e, t) {
 	e.postMessage({
 		type: "updateDb",
 		database: t
 	});
 }
-function Ss(e, t) {
+function xs(e, t) {
 	let n = new Worker(e, { type: "module" });
-	return xs(n, t), n;
+	return bs(n, t), n;
 }
-function Cs(e) {
+function Ss(e) {
 	return (t) => {
 		e.postMessage({
 			type: "recognize",
@@ -5051,7 +5050,7 @@ function Cs(e) {
 		});
 	};
 }
-function ws(e, t) {
+function Cs(e, t) {
 	e.onmessage = (e) => {
 		e.data.type === "result" && t({
 			word: e.data.word,
@@ -5061,22 +5060,25 @@ function ws(e, t) {
 }
 //#endregion
 //#region src/distance.ts
-var Ts = 1e3;
-function Es(e, t) {
+var ws = 1e3;
+function Ts(e, t) {
 	let n = 0;
 	for (let r of ["left", "right"]) {
 		let i = e[r], a = t[r];
 		if (!i && !a) continue;
 		if (!i || !a) {
-			n += Ts;
+			n += ws;
 			continue;
 		}
 		let o = Math.min(i.length, a.length);
-		for (let e = 0; e < o; e++) n += Math.abs(i[e] - a[e]);
+		for (let e = 0; e < o; e++) {
+			let t = Math.abs(i[e] - a[e]);
+			n += Math.exp(t) - 1;
+		}
 	}
 	return n;
 }
-function Ds(e) {
+function Es(e) {
 	let t = e.slice(), n = t.length;
 	for (let e = 0; e < 3; e++) {
 		let r = n - 6 + e, i = n - 3 + e;
@@ -5084,29 +5086,29 @@ function Ds(e) {
 	}
 	return t;
 }
-function Os(e) {
+function Ds(e) {
 	return { vectors: e.vectors.map((e) => ({
-		left: e.right ? Ds(e.right) : void 0,
-		right: e.left ? Ds(e.left) : void 0
+		left: e.right ? Es(e.right) : void 0,
+		right: e.left ? Es(e.left) : void 0
 	})) };
 }
-function ks(e, t) {
+function Os(e, t) {
 	let n = e.vectors.length, r = t.vectors.length;
 	if (n === 0 || r === 0) return Infinity;
-	let a = new i(e.vectors, t.vectors, Es).getDistance(), o = new i(e.vectors, Os(t).vectors, Es).getDistance();
+	let a = new i(e.vectors, t.vectors, Ts).getDistance(), o = new i(e.vectors, Ds(t).vectors, Ts).getDistance();
 	return Math.min(a, o) / (n + r);
 }
 //#endregion
 //#region src/sign-map.ts
-var As = "{???}", js = class {
+var ks = "{???}", As = class {
 	#e = [];
 	constructor(e) {
 		this.#e = e ?? [];
 	}
 	recognizeSign(e) {
-		let t = As, n = Infinity;
+		let t = ks, n = Infinity;
 		for (let r of this.map) {
-			let i = ks(e, r.embedding);
+			let i = Os(e, r.embedding);
 			i < n && (n = i, t = r.word);
 		}
 		e.word = t, console.log("sign:", e, "distance:", n);
@@ -5123,4 +5125,4 @@ var As = "{???}", js = class {
 	}
 };
 //#endregion
-export { hs as DB_VERSION, fs as PACKAGE_VERSION, js as SignMap, Ss as createClassificationWorker, bs as createLandmarker, Cs as createRecognizeHandler, ks as dtwDistance, vs as isDatabaseVersionCompatible, ys as isValidDatabaseFile, _s as isValidMapData, ws as onClassificationResult, xs as updateDb };
+export { ms as DB_VERSION, ds as PACKAGE_VERSION, As as SignMap, xs as createClassificationWorker, ys as createLandmarker, Ss as createRecognizeHandler, Os as dtwDistance, _s as isDatabaseVersionCompatible, vs as isValidDatabaseFile, gs as isValidMapData, Cs as onClassificationResult, bs as updateDb };

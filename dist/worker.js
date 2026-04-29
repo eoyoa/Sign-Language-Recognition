@@ -4638,7 +4638,10 @@ function ul(e, t) {
 			continue;
 		}
 		let o = Math.min(i.length, a.length);
-		for (let e = 0; e < o; e++) n += Math.abs(i[e] - a[e]);
+		for (let e = 0; e < o; e++) {
+			let t = Math.abs(i[e] - a[e]);
+			n += Math.exp(t) - 1;
+		}
 	}
 	return n;
 }
