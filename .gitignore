@@ -25,7 +25,5 @@ dist-ssr
 *.sw?
 
 # landmarking wasm/task (large binary files, not committed)
-public/wasm
-public/tasks
-packages/demo/public/wasm
-packages/demo/public/tasks
+demo/public/wasm
+demo/public/tasks
